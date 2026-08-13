@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BLUE — Photography Portfolio</title>
+<meta name="description" content="사진가 BLUE의 포트폴리오. 빛과 어둠 사이의 순간들.">
+<!--
+  ══════════════════════════════════════════════════════════════
+  ★ 사진 추가 방법 ★
+  1) photos 폴더에 사진 파일을 넣으세요
+  2) 아래 <script> 안의 ALBUMS 배열에 세트를 추가하거나
+     기존 세트의 photos 목록에 파일 경로를 추가하세요
+  3) work(작품) / character(캐릭터) / model(모델) / recipe(촬영 정보)를
+     세트에 맞게 수정하세요 — 갤러리에는 세트당 대표 사진 1장만 보이고,
+     클릭하면 세트 전체를 넘겨볼 수 있어요
+  ══════════════════════════════════════════════════════════════
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Noto+Serif+KR:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+  /* ── Reset & tokens ─────────────────────────────── */
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+  :root {
+    --bg:      #0b0b0d;
+    --bg-2:    #101013;
+    --ink:     #e9e6df;
+    --muted:   #8f8a81;
+    --faint:   #55524c;
+    --line:    rgba(233,230,223,.09);
+    --accent:  #c2a173;
+    --serif:   'Cormorant Garamond', 'Noto Serif KR', 'Apple SD Gothic Neo', serif;
+    --serif-kr:'Noto Serif KR', 'Cormorant Garamond', 'Apple SD Gothic Neo', serif;
+    --sans:    -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Pretendard', 'Segoe UI', 'Malgun Gothic', sans-serif;
+  }
+
+  html { scroll-behavior:smooth; }
+  body {
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:15px;
+    line-height:1.8;
+    letter-spacing:-.01em;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  ::selection { background:rgba(194,161,115,.28); color:#fff; }
+  img { display:block; max-width:100%; }
+  a { color:inherit; text-decoration:none; }
+  button { font:inherit; color:inherit; background:none; border:0; cursor:pointer; }
+
+  ::-webkit-scrollbar { width:10px; }
+  ::-webkit-scrollbar-track { background:var(--bg); }
+  ::-webkit-scrollbar-thumb { background:#26262b; border-radius:5px; border:2px solid var(--bg); }
+  ::-webkit-scrollbar-thumb:hover { background:#3a3a41; }
+
+  /* ── Film grain overlay ─────────────────────────── */
+  .grain {
+    position:fixed; inset:-50%;
+    width:200%; height:200%;
+    pointer-events:none; z-index:90;
+    opacity:.045;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+    animation:grain 8s steps(10) infinite;
+  }
+  @keyframes grain {
+    0%,100% { transform:translate(0,0); }
+    20% { transform:translate(-2%,2%); }
+    40% { transform:translate(2%,-1%); }
+    60% { transform:translate(-1%,-2%); }
+    80% { transform:translate(1%,2%); }
+  }
+
+  /* ── Typography helpers ─────────────────────────── */
+  .eyebrow {
+    font-size:11px; letter-spacing:.42em; text-transform:uppercase;
+    color:var(--accent); font-weight:500;
+  }
+  .serif { font-family:var(--serif); }
+
+  /* ── Nav ────────────────────────────────────────── */
+  nav {
+    position:fixed; top:0; left:0; right:0; z-index:80;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:26px clamp(24px, 5vw, 56px);
+    transition:background .5s ease, padding .5s ease, border-color .5s ease;
+    border-bottom:1px solid transparent;
+  }
+  nav.scrolled {
+    padding-top:14px; padding-bottom:14px;
+    background:rgba(11,11,13,.75);
+    -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
+    border-bottom-color:var(--line);
+  }
+  .nav-logo {
+    font-family:var(--serif);
+    font-size:17px; letter-spacing:.18em; font-weight:500;
+  }
+  .nav-logo em { font-style:italic; color:var(--muted); font-weight:300; }
+  .nav-links { display:flex; gap:clamp(20px, 3.5vw, 44px); }
+  .nav-links a {
+    font-size:11px; letter-spacing:.3em; text-transform:uppercase;
+    color:var(--muted); position:relative; padding:4px 0;
+    transition:color .35s ease;
+  }
+  .nav-links a::after {
+    content:''; position:absolute; left:0; bottom:0;
+    width:100%; height:1px; background:var(--accent);
+    transform:scaleX(0); transform-origin:right;
+    transition:transform .45s cubic-bezier(.2,.6,.2,1);
+  }
+  .nav-links a:hover { color:var(--ink); }
+  .nav-links a:hover::after { transform:scaleX(1); transform-origin:left; }
+
+  /* ── Hero ───────────────────────────────────────── */
+  .hero {
+    position:relative; min-height:100svh;
+    display:flex; flex-direction:column;
+    justify-content:center; align-items:center;
+    text-align:center; overflow:hidden;
+    background:
+      radial-gradient(ellipse 90% 60% at 50% 115%, rgba(194,161,115,.13), transparent 60%),
+      radial-gradient(ellipse 70% 55% at 78% -10%, rgba(48,66,94,.35), transparent 65%),
+      radial-gradient(ellipse 60% 50% at 12% 8%, rgba(34,40,58,.4), transparent 60%),
+      linear-gradient(180deg, #0d0e12 0%, #0b0b0d 55%, #090909 100%);
+  }
+  .hero::after {  /* vignette */
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background:radial-gradient(ellipse 120% 90% at 50% 45%, transparent 55%, rgba(0,0,0,.55) 100%);
+  }
+  .hero > * { position:relative; z-index:2; }
+
+  .hero .eyebrow { margin-bottom:34px; }
+  .hero h1 {
+    font-family:var(--serif);
+    font-weight:300;
+    font-size:clamp(72px, 14vw, 168px);
+    line-height:1.04;
+    letter-spacing:.14em;
+    margin-left:.14em; /* letter-spacing 시각 보정 */
+  }
+  .hero .latin {
+    font-family:var(--serif);
+    font-style:italic; font-weight:300;
+    font-size:clamp(17px, 2.2vw, 24px);
+    letter-spacing:.34em; text-transform:uppercase;
+    color:var(--muted); margin-top:26px;
+  }
+  .hero .tagline {
+    margin-top:44px; font-size:14px; color:var(--faint);
+    letter-spacing:.06em; font-weight:300;
+  }
+  .hero .tagline b { color:var(--muted); font-weight:400; }
+
+  .scroll-cue {
+    position:absolute; bottom:0; left:50%; transform:translateX(-50%);
+    display:flex; flex-direction:column; align-items:center; gap:14px;
+    padding-bottom:0; z-index:2;
+  }
+  .scroll-cue span {
+    font-size:9px; letter-spacing:.4em; text-transform:uppercase; color:var(--faint);
+  }
+  .scroll-cue .cue-line {
+    width:1px; height:72px; overflow:hidden; position:relative;
+    background:rgba(233,230,223,.1);
+  }
+  .scroll-cue .cue-line::after {
+    content:''; position:absolute; left:0; top:-100%;
+    width:100%; height:100%;
+    background:linear-gradient(180deg, transparent, var(--accent));
+    animation:cue 2.4s cubic-bezier(.6,.1,.3,.9) infinite;
+  }
+  @keyframes cue { 0%{top:-100%} 55%,100%{top:100%} }
+
+  /* ── Sections ───────────────────────────────────── */
+  section { position:relative; }
+  .wrap {
+    max-width:1440px; margin:0 auto;
+    padding:clamp(96px, 13vw, 180px) clamp(24px, 5vw, 56px);
+  }
+  .sec-head { margin-bottom:clamp(48px, 6vw, 84px); }
+  .sec-head .eyebrow { display:block; margin-bottom:20px; }
+  .sec-head h2 {
+    font-family:var(--serif-kr);
+    font-weight:200;
+    font-size:clamp(38px, 5.5vw, 68px);
+    line-height:1.15; letter-spacing:.03em;
+  }
+  .sec-head h2 em {
+    font-family:var(--serif); font-style:italic;
+    color:var(--muted); letter-spacing:.02em;
+  }
+
+  /* ── Gallery ────────────────────────────────────── */
+  .masonry {
+    column-count:3; column-gap:24px;
+  }
+  .ph-item {
+    break-inside:avoid; margin-bottom:26px;
+    position:relative; overflow:hidden; cursor:pointer;
+    border-radius:2px; background:var(--bg-2);
+    transform:translateZ(0);
+  }
+  .ph-item img {
+    width:100%; transition:transform 1.1s cubic-bezier(.16,.6,.2,1), opacity .6s ease;
+  }
+  .ph-item:hover img { transform:scale(1.045); }
+  .ph-item .veil {
+    position:absolute; inset:0;
+    background:linear-gradient(200deg, transparent 42%, rgba(5,5,7,.82) 100%);
+    opacity:0; transition:opacity .6s ease;
+    display:flex; flex-direction:column; justify-content:flex-end;
+    padding:26px 26px 24px;
+  }
+  .ph-item:hover .veil { opacity:1; }
+  .ph-item .veil .sub {
+    font-size:10px; letter-spacing:.34em; color:var(--accent);
+    text-transform:uppercase; margin-bottom:8px;
+    transform:translateY(12px); transition:transform .6s cubic-bezier(.2,.6,.2,1);
+  }
+  .ph-item .veil .ttl {
+    font-family:var(--serif-kr); font-weight:300;
+    font-size:21px; letter-spacing:.04em; color:#fff;
+    transform:translateY(12px); transition:transform .6s cubic-bezier(.2,.6,.2,1) .05s;
+  }
+  .ph-item:hover .veil .sub,
+  .ph-item:hover .veil .ttl { transform:translateY(0); }
+
+  .ph-item .count {
+    position:absolute; top:16px; right:16px;
+    font-size:10px; letter-spacing:.22em; color:rgba(233,230,223,.85);
+    background:rgba(8,8,10,.45);
+    -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+    border:1px solid rgba(233,230,223,.16);
+    border-radius:999px; padding:6px 12px;
+  }
+
+  /* ── About ──────────────────────────────────────── */
+  .about { background:var(--bg-2); border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+  .about-grid {
+    display:grid; grid-template-columns:5fr 7fr;
+    gap:clamp(48px, 7vw, 110px); align-items:center;
+  }
+  .about-photo {
+    position:relative; border-radius:2px; overflow:hidden;
+  }
+  .about-photo::after {
+    content:''; position:absolute; inset:0;
+    box-shadow:inset 0 0 120px rgba(0,0,0,.35);
+  }
+  .about-photo img { width:100%; }
+  .about-body .eyebrow { display:block; margin-bottom:22px; }
+  .about-body h2 {
+    font-family:var(--serif-kr); font-weight:200;
+    font-size:clamp(34px, 4.5vw, 56px);
+    line-height:1.25; letter-spacing:.03em;
+    margin-bottom:34px;
+  }
+  .about-body h2 em { font-family:var(--serif); font-style:italic; color:var(--accent); }
+  .about-body p { color:var(--muted); font-weight:300; max-width:56ch; }
+  .about-body p + p { margin-top:1.2em; }
+  .about-meta {
+    margin-top:52px; display:grid;
+    grid-template-columns:repeat(3, minmax(0,1fr)); gap:28px;
+    border-top:1px solid var(--line); padding-top:34px;
+  }
+  .about-meta .k {
+    font-size:10px; letter-spacing:.3em; text-transform:uppercase;
+    color:var(--faint); margin-bottom:10px;
+  }
+  .about-meta .v { font-size:13.5px; color:var(--ink); font-weight:300; line-height:1.7; }
+
+  /* ── Contact ────────────────────────────────────── */
+  .contact { text-align:center; }
+  .contact .eyebrow { display:block; margin-bottom:26px; }
+  .contact h2 {
+    font-family:var(--serif-kr); font-weight:200;
+    font-size:clamp(32px, 4.8vw, 60px);
+    line-height:1.3; letter-spacing:.03em;
+    margin-bottom:52px;
+  }
+  .contact h2 em { font-family:var(--serif); font-style:italic; color:var(--muted); }
+  .email-link {
+    font-family:var(--serif); font-style:italic; font-weight:300;
+    font-size:clamp(24px, 4.2vw, 52px);
+    letter-spacing:.02em; position:relative; display:inline-block;
+    color:var(--ink); transition:color .4s ease;
+  }
+  .email-link::after {
+    content:''; position:absolute; left:0; bottom:-6px;
+    width:100%; height:1px; background:var(--accent);
+    transform:scaleX(0); transform-origin:right;
+    transition:transform .55s cubic-bezier(.2,.6,.2,1);
+  }
+  .email-link:hover { color:#fff; }
+  .email-link:hover::after { transform:scaleX(1); transform-origin:left; }
+  .socials { margin-top:56px; display:flex; justify-content:center; gap:40px; }
+  .socials a {
+    font-size:11px; letter-spacing:.3em; text-transform:uppercase;
+    color:var(--faint); transition:color .35s ease;
+  }
+  .socials a:hover { color:var(--accent); }
+
+  footer {
+    border-top:1px solid var(--line);
+    padding:34px clamp(24px, 5vw, 56px);
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px;
+    font-size:11px; letter-spacing:.14em; color:var(--faint);
+  }
+  footer .serif { font-style:italic; letter-spacing:.06em; }
+
+  /* ── Lightbox ───────────────────────────────────── */
+  .lb {
+    position:fixed; inset:0; z-index:120;
+    background:rgba(7,7,9,.94);
+    -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px);
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; visibility:hidden;
+    transition:opacity .45s ease, visibility .45s ease;
+  }
+  .lb.open { opacity:1; visibility:visible; }
+  .lb img {
+    max-width:min(88vw, 1400px); max-height:80vh;
+    border-radius:2px;
+    box-shadow:0 40px 120px rgba(0,0,0,.7);
+    opacity:0; transform:scale(.975);
+    transition:opacity .5s ease .1s, transform .6s cubic-bezier(.2,.6,.2,1) .1s;
+  }
+  .lb.open img { opacity:1; transform:scale(1); }
+  .lb-cap {
+    position:absolute; left:clamp(20px,4vw,48px); bottom:clamp(20px,4vw,40px);
+  }
+  .lb-cap .sub { font-size:10px; letter-spacing:.34em; color:var(--accent); text-transform:uppercase; }
+  .lb-cap .ttl { font-family:var(--serif-kr); font-weight:300; font-size:22px; margin-top:6px; }
+  .lb-cap .recipe {
+    margin-top:12px; font-size:10.5px; letter-spacing:.18em;
+    color:var(--muted); text-transform:uppercase;
+  }
+  .lb-count {
+    position:absolute; right:clamp(20px,4vw,48px); bottom:clamp(20px,4vw,40px);
+    font-family:var(--serif); font-style:italic;
+    font-size:14px; letter-spacing:.14em; color:var(--muted);
+  }
+  .lb-strip {
+    position:absolute; bottom:clamp(18px,3vw,30px); left:50%;
+    transform:translateX(-50%);
+    display:flex; gap:8px;
+  }
+  .lb-strip img {
+    width:46px; height:46px; object-fit:cover;
+    border-radius:2px; cursor:pointer;
+    opacity:.4; border:1px solid transparent;
+    transition:opacity .35s ease, border-color .35s ease;
+  }
+  .lb-strip img:hover { opacity:.75; }
+  .lb-strip img.cur { opacity:1; border-color:var(--accent); }
+  @media (max-width: 760px) { .lb-strip { display:none; } }
+  .lb-btn {
+    position:absolute; top:50%; transform:translateY(-50%);
+    width:52px; height:52px; border-radius:50%;
+    border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--muted); font-size:18px;
+    transition:border-color .35s ease, color .35s ease, background .35s ease;
+  }
+  .lb-btn:hover { border-color:var(--accent); color:var(--ink); background:rgba(194,161,115,.06); }
+  .lb-prev { left:clamp(14px,3vw,40px); }
+  .lb-next { right:clamp(14px,3vw,40px); }
+  .lb-close {
+    position:absolute; top:clamp(18px,3vw,32px); right:clamp(18px,3vw,40px);
+    width:48px; height:48px; border-radius:50%;
+    border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--muted); font-size:20px; line-height:1;
+    transition:border-color .35s ease, color .35s ease, transform .5s ease;
+  }
+  .lb-close:hover { border-color:var(--accent); color:var(--ink); transform:rotate(90deg); }
+
+  /* ── Reveal on scroll ───────────────────────────── */
+  .reveal {
+    opacity:0; transform:translateY(28px);
+    transition:opacity 1s cubic-bezier(.2,.6,.2,1), transform 1s cubic-bezier(.2,.6,.2,1);
+  }
+  .reveal.on { opacity:1; transform:translateY(0); }
+
+  /* ── Responsive ─────────────────────────────────── */
+  @media (max-width: 1080px) {
+    .masonry { column-count:2; column-gap:20px; }
+    .about-grid { grid-template-columns:1fr; gap:56px; }
+    .about-photo { max-width:480px; }
+  }
+  @media (max-width: 660px) {
+    .masonry { column-count:1; }
+    .nav-links a:not([href="#work"]):not([href="#contact"]) { display:none; }
+    .about-meta { grid-template-columns:1fr 1fr; }
+    .lb-btn { width:44px; height:44px; }
+    .lb-cap .ttl { font-size:17px; }
+    .ph-item .veil {
+      opacity:1;
+      background:linear-gradient(200deg, transparent 55%, rgba(5,5,7,.78) 100%);
+    }
+    .ph-item .veil .sub, .ph-item .veil .ttl { transform:translateY(0); }
+    .ph-item .veil .ttl { font-size:18px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior:auto; }
+    *, *::before, *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; }
+    .reveal { opacity:1; transform:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+
+<nav id="nav" aria-label="주 메뉴">
+  <a class="nav-logo" href="#top">BLUE <em>photography</em></a>
+  <div class="nav-links">
+    <a href="#work">Work</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+  </div>
+</nav>
+
+<!-- ── Hero ─────────────────────────────────────────── -->
+<header class="hero" id="top">
+  <p class="eyebrow">Photography Portfolio</p>
+  <h1>BLUE</h1>
+  <p class="latin">Cosplay Photographer</p>
+  <p class="tagline">빛과 어둠 사이, <b>머무는 순간들을 기록합니다</b></p>
+  <div class="scroll-cue" aria-hidden="true">
+    <span>Scroll</span>
+    <div class="cue-line"></div>
+  </div>
+</header>
+
+<!-- ── Work ─────────────────────────────────────────── -->
+<section id="work">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Selected Work</span>
+      <h2>작업물 <em>— cosplay portraits</em></h2>
+    </div>
+    <div class="masonry" id="masonry"></div>
+  </div>
+</section>
+
+<!-- ── About ────────────────────────────────────────── -->
+<section id="about" class="about">
+  <div class="wrap">
+    <div class="about-grid">
+      <div class="about-photo reveal">
+        <img id="aboutPortrait" alt="BLUE 프로필 사진">
+      </div>
+      <div class="about-body">
+        <span class="eyebrow reveal">About</span>
+        <h2 class="reveal">캐릭터가 <em>현실</em>이 되는<br>찰나를 기다리는 사람</h2>
+        <p class="reveal">서울을 기반으로 활동하는 코스프레 사진가 BLUE입니다. 모델의 시선과 손끝, 의상의 디테일이 하나로 모여 캐릭터 그 자체가 되는 순간 — 그 찰나를 놓치지 않으려고 셔터 앞에서 기다립니다.</p>
+        <p class="reveal">얕은 심도로 배경의 소란을 지우고 인물만 또렷하게 남기는 방식을 좋아합니다. 행사장의 즉흥적인 한 컷부터 기획 촬영까지, 캐릭터가 현실에 잠시 머물다 간 기록을 선명한 색으로 담습니다.</p>
+        <div class="about-meta reveal">
+          <div>
+            <div class="k">Based in</div>
+            <div class="v">Seoul, Korea</div>
+          </div>
+          <div>
+            <div class="k">Focus</div>
+            <div class="v">코스프레 · 인물</div>
+          </div>
+          <div>
+            <div class="k">Available for</div>
+            <div class="v">촬영 의뢰 · 협업 · 전시</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Contact ──────────────────────────────────────── -->
+<section id="contact" class="contact">
+  <div class="wrap">
+    <span class="eyebrow reveal">Contact</span>
+    <h2 class="reveal">함께 작업하고 싶다면<br><em>let's make something quiet & beautiful</em></h2>
+    <a class="email-link reveal" href="mailto:tyarnno@gmail.com">tyarnno@gmail.com</a>
+    <div class="socials reveal">
+      <a href="https://www.instagram.com/parkjaehyun1996" target="_blank" rel="noopener" aria-label="Instagram @parkjaehyun1996">Instagram</a>
+      <a href="https://x.com/Carpediem259404" target="_blank" rel="noopener" aria-label="X @Carpediem259404">X</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>© 2026 BLUE. All rights reserved.</span>
+  <span class="serif">captured in the dark, developed in silence</span>
+</footer>
+
+<!-- ── Lightbox ─────────────────────────────────────── -->
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="사진 크게 보기">
+  <img id="lbImg" alt="">
+  <div class="lb-cap">
+    <div class="sub" id="lbModel"></div>
+    <div class="ttl" id="lbTtl"></div>
+    <div class="recipe" id="lbRecipe"></div>
+  </div>
+  <div class="lb-count" id="lbCount"></div>
+  <div class="lb-strip" id="lbStrip" aria-label="세트 썸네일"></div>
+  <button class="lb-btn lb-prev" id="lbPrev" aria-label="이전 사진">←</button>
+  <button class="lb-btn lb-next" id="lbNext" aria-label="다음 사진">→</button>
+  <button class="lb-close" id="lbClose" aria-label="닫기">×</button>
+</div>
+
+<script>
+'use strict';
+
+/* ══════════════════════════════════════════════════════
+   ★ 앨범(세트) 목록 — 여기만 수정하면 됩니다 ★
+
+   세트 하나 = 갤러리의 대표 카드 1장.
+   클릭하면 photos 목록의 사진을 차례로 넘겨볼 수 있어요.
+
+   - work      : 작품(게임/애니) 이름
+   - note      : 세트 구분 메모 (예: '실내') — 없으면 '' 로 두세요
+   - character : 코스프레 캐릭터 이름
+   - model     : 모델 이름 또는 SNS 아이디
+   - recipe    : 촬영 정보 — 비워두면(recipe:'') 표시되지 않아요
+   - cover     : 대표 사진 번호 (0 = photos의 첫 번째)
+   - photos    : 세트에 포함된 사진 경로 목록 (순서대로 표시)
+   ══════════════════════════════════════════════════════ */
+const ALBUMS = [
+  {
+    work: '니케', note: '', character: '레이블', model: '@myuaa_cchi',
+    recipe: 'Nikon Z6III · 85mm · f/1.2 · 1/8000s · ISO 250',
+    cover: 0,
+    photos: ['photos/nikke-01.jpg', 'photos/nikke-02.jpg', 'photos/nikke-03.jpg', 'photos/nikke-04.jpg'],
+  },
+  {
+    work: '명조', note: '', character: '린네', model: '@momonga_cos',
+    recipe: 'Nikon Z6III · 54mm · f/13 · 1/125s · ISO 80',
+    cover: 1,
+    photos: ['photos/wuwa-01.jpg', 'photos/wuwa-02.jpg', 'photos/wuwa-03.jpg'],
+  },
+  {
+    work: '명조', note: '실내', character: '린네', model: '@momonga_cos',
+    recipe: 'Nikon Z6III · 41mm · f/5 · 1/100s · ISO 1250',
+    cover: 0,
+    photos: ['photos/wuwa-in-01.jpg', 'photos/wuwa-in-02.jpg'],
+  },
+  {
+    work: '죠죠의 기묘한 모험', note: '', character: '퍼니 발렌타인', model: '@sehy_log',
+    recipe: 'Nikon Z6III · 85mm · f/1.2 · 1/8000s · ISO 200',
+    cover: 1,
+    photos: ['photos/jojo-01.jpg', 'photos/jojo-02.jpg', 'photos/jojo-03.jpg', 'photos/jojo-04.jpg'],
+  },
+  {
+    work: '콜 오브 듀티', note: '', character: '고스트', model: '@_ND_03_',
+    recipe: 'Nikon Z6III · 85mm · f/5.6 · 1/500s · ISO 50',
+    cover: 0,
+    photos: ['photos/cod-01.jpg'],
+  },
+  {
+    work: '검은 오공', note: '', character: '오공', model: '@jaewon132222',
+    recipe: 'Nikon Z6III · 85mm · f/5.6 · 1/2000s · ISO 320',
+    cover: 0,
+    photos: ['photos/wukong-01.jpg', 'photos/wukong-02.jpg', 'photos/wukong-03.jpg'],
+  },
+  {
+    work: '그 비스크 돌은 사랑을 한다', note: '', character: '키타가와 마린', model: '@N1RB4NA',
+    recipe: 'Nikon Z6III · 85mm · f/1.8 · 1/1250s · ISO 320',
+    cover: 0,
+    photos: ['photos/marin-01.jpg', 'photos/marin-02.jpg'],
+  },
+  {
+    work: '더 블러드 오브 데멘션 워커', note: '', character: '미상', model: '@Leon_Chiro',
+    recipe: 'Nikon Z6III · 85mm · f/9 · 1/60s · ISO 2500',
+    cover: 0,
+    photos: ['photos/dw-01.jpg', 'photos/dw-02.jpg', 'photos/dw-03.jpg', 'photos/dw-04.jpg', 'photos/dw-05.jpg'],
+  },
+  {
+    work: '리제로', note: '', character: '렘', model: '@N1RB4NA',
+    recipe: '',
+    cover: 0,
+    photos: ['photos/rem-01.jpg', 'photos/rem-02.jpg'],
+  },
+  {
+    work: '명조', note: '', character: '에이메스', model: '@momonga_cos',
+    recipe: 'Nikon Z6III · 85mm · f/1.2 · 1/6400s · ISO 100',
+    cover: 0,
+    photos: ['photos/ames-01.jpg', 'photos/ames-02.jpg'],
+  },
+  {
+    work: '명조', note: '', character: '칸타렐라', model: '@Maem_cos',
+    recipe: 'Nikon Z6III · 85mm · f/1.2 · 1/8000s · ISO 200',
+    cover: 0,
+    photos: ['photos/canta-01.jpg', 'photos/canta-02.jpg'],
+  },
+  {
+    work: '미상', note: '', character: '미상', model: '@peng_cos',
+    recipe: 'Nikon Z6III · 85mm · f/1.2 · 1/8000s · ISO 50',
+    cover: 0,
+    photos: ['photos/peng-01.jpg', 'photos/peng-02.jpg', 'photos/peng-03.jpg', 'photos/peng-04.jpg', 'photos/peng-05.jpg'],
+  },
+  {
+    work: '미상', note: '', character: '흑의 기사 & 백의 기사', model: '@cos_ongs',
+    recipe: 'Nikon Z6III · 24mm · f/3.5 · 1/125s · ISO 50',
+    cover: 0,
+    photos: ['photos/knight-01.jpg', 'photos/knight-02.jpg', 'photos/knight-03.jpg', 'photos/knight-04.jpg'],
+  },
+  {
+    work: '붕괴 스타레일', note: '', character: '달리아', model: '@utau6607',
+    recipe: 'Nikon Z6III · 85mm · f/1.2 · 1/8000s · ISO 100',
+    cover: 0,
+    photos: ['photos/dahlia-01.jpg', 'photos/dahlia-02.jpg', 'photos/dahlia-03.jpg'],
+  },
+  {
+    work: '블루 아카이브', note: '', character: '노조미 & 히카리', model: '@Bunny99609381',
+    recipe: 'Nikon Z6III · 85mm · f/3.2 · 1/8000s · ISO 1100',
+    cover: 0,
+    photos: ['photos/ba-01.jpg', 'photos/ba-02.jpg'],
+  },
+  {
+    work: '사이버펑크 엣지러너', note: '', character: '아담 스매셔', model: '@kuku122900',
+    recipe: 'Nikon Z6III · 85mm · f/1.2 · 1/8000s · ISO 200',
+    cover: 0,
+    photos: ['photos/adam-01.jpg', 'photos/adam-02.jpg', 'photos/adam-03.jpg'],
+  },
+  {
+    work: '약사의 혼잣말', note: '', character: '진시 & 마오마오', model: '@star_4004 & @sysexn113',
+    recipe: 'Nikon Z6III · 85mm · f/1.2 · 1/8000s · ISO 80',
+    cover: 0,
+    photos: ['photos/kusuri-duo-01.jpg', 'photos/kusuri-duo-02.jpg', 'photos/kusuri-duo-03.jpg'],
+  },
+  {
+    work: '약사의 혼잣말', note: '', character: '진시 & 마오마오', model: '@stars_4004',
+    recipe: 'Nikon Z6III · 37mm · f/5.6 · 1/1600s · ISO 2500',
+    cover: 0,
+    photos: ['photos/kusuri-01.jpg'],
+  },
+  {
+    work: '원신', note: '', character: '종려', model: '@stars_4004',
+    recipe: 'Nikon Z6III · 26mm · f/5.6 · 1/125s · ISO 320',
+    cover: 0,
+    photos: ['photos/zhongli-01.jpg', 'photos/zhongli-02.jpg', 'photos/zhongli-03.jpg'],
+  },
+  {
+    work: '이터널 리턴', note: '', character: '루크', model: '@ha_jo200',
+    recipe: 'Nikon Z6III · 85mm · f/10 · 1/125s · ISO 100',
+    cover: 0,
+    photos: ['photos/luke-01.jpg'],
+  },
+  {
+    work: '젠레스 존 제로', note: '', character: '비비안', model: '@hoHoHoliday_27',
+    recipe: 'Nikon Z6III · 85mm · f/1.2 · 1/8000s · ISO 100',
+    cover: 0,
+    photos: ['photos/vivian-01.jpg', 'photos/vivian-02.jpg', 'photos/vivian-03.jpg', 'photos/vivian-04.jpg'],
+  },
+  {
+    work: '젠레스 존 제로', note: '', character: '수나', model: '@chyamu214',
+    recipe: 'Nikon Z6III · 85mm · f/2.5 · 1/8000s · ISO 1400',
+    cover: 0,
+    photos: ['photos/suna-01.jpg', 'photos/suna-02.jpg'],
+  },
+  {
+    work: '젠레스 존 제로', note: '', character: '코린', model: '@chaymu214',
+    recipe: 'Nikon Z6III · 85mm · f/6.3 · 1/500s · ISO 200',
+    cover: 0,
+    photos: ['photos/corin-01.jpg', 'photos/corin-02.jpg'],
+  },
+  {
+    work: '체인소 맨', note: '', character: '요루', model: '@fresaberrycos',
+    recipe: 'Nikon Z6III · 70mm · f/2.8 · 1/320s · ISO 250',
+    cover: 0,
+    photos: ['photos/yoru-01.jpg', 'photos/yoru-02.jpg'],
+  },
+];
+
+/* About 섹션 프로필 사진 — 'photos/profile.jpg' 등으로 교체하세요 */
+const PORTRAIT_SRC = ph(13, 800, 1000, '#111013', '#3a3630', '#a39a85');
+
+/* ── 플레이스홀더 이미지 생성기 (사진 교체 후엔 지워도 됨) ── */
+function ph(seed, w, h, c1, c2, c3) {
+  const num = String(seed).padStart(2, '0');
+  const gx = 30 + ((seed * 37) % 45);
+  const gy = 20 + ((seed * 53) % 55);
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">` +
+      `<defs>` +
+        `<linearGradient id="g" x1="0" y1="0" x2="${(seed%2)?1:0.2}" y2="1">` +
+          `<stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/>` +
+        `</linearGradient>` +
+        `<radialGradient id="r" cx="${gx}%" cy="${gy}%" r="75%">` +
+          `<stop offset="0" stop-color="${c3}" stop-opacity="0.5"/>` +
+          `<stop offset="0.55" stop-color="${c3}" stop-opacity="0.08"/>` +
+          `<stop offset="1" stop-color="${c3}" stop-opacity="0"/>` +
+        `</radialGradient>` +
+        `<filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" seed="${seed}"/>` +
+        `<feColorMatrix type="saturate" values="0"/>` +
+        `<feComponentTransfer><feFuncA type="linear" slope="0.07"/></feComponentTransfer>` +
+        `<feComposite operator="over" in2="SourceGraphic"/></filter>` +
+      `</defs>` +
+      `<g filter="url(#n)">` +
+        `<rect width="${w}" height="${h}" fill="url(#g)"/>` +
+        `<rect width="${w}" height="${h}" fill="url(#r)"/>` +
+      `</g>` +
+      `<rect width="${w}" height="${h}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="2"/>` +
+      `<text x="50%" y="49%" text-anchor="middle" fill="rgba(255,255,255,0.34)" ` +
+        `font-family="Georgia, serif" font-style="italic" font-size="${Math.round(w*0.085)}" letter-spacing="6">${num}</text>` +
+      `<text x="50%" y="55%" text-anchor="middle" fill="rgba(255,255,255,0.18)" ` +
+        `font-family="Helvetica, Arial, sans-serif" font-size="${Math.round(w*0.021)}" letter-spacing="5">PLACEHOLDER — 사진으로 교체</text>` +
+    `</svg>`;
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+}
+
+/* ── 갤러리 렌더링 (세트당 대표 카드 1장) ───────── */
+const masonry = document.getElementById('masonry');
+
+ALBUMS.forEach((a, i) => {
+  const fig = document.createElement('figure');
+  fig.className = 'ph-item reveal';
+  fig.setAttribute('tabindex', '0');
+  fig.setAttribute('role', 'button');
+  const setLabel = a.note ? `${a.work} (${a.note})` : a.work;
+  fig.setAttribute('aria-label', `${setLabel} ${a.character} 세트 (${a.photos.length}장) — 모델 ${a.model}, 열어 보기`);
+  fig.innerHTML =
+    `<img src="${a.photos[a.cover || 0]}" alt="${setLabel} ${a.character} 코스프레, 모델 ${a.model}" loading="lazy">` +
+    `<span class="count">${a.photos.length}장</span>` +
+    `<figcaption class="veil"><div class="sub">${setLabel} · ${a.model}</div><div class="ttl">${a.character}</div></figcaption>`;
+  fig.addEventListener('click', () => openLb(i, a.cover || 0));
+  fig.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLb(i, a.cover || 0); }
+  });
+  masonry.appendChild(fig);
+});
+
+document.getElementById('aboutPortrait').src = PORTRAIT_SRC;
+
+/* ── 라이트박스 ────────────────────────────────── */
+const lb       = document.getElementById('lb');
+const lbImg    = document.getElementById('lbImg');
+const lbTtl    = document.getElementById('lbTtl');
+const lbModel  = document.getElementById('lbModel');
+const lbRecipe = document.getElementById('lbRecipe');
+const lbCount  = document.getElementById('lbCount');
+const lbStrip  = document.getElementById('lbStrip');
+let curAlbum = 0;
+let lbIdx = 0;
+let lastFocus = null;
+
+function openLb(albumIdx, photoIdx) {
+  lastFocus = document.activeElement;
+  curAlbum = albumIdx;
+  lbIdx = photoIdx || 0;
+  buildStrip();
+  updateLb();
+  lb.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('lbClose').focus();
+}
+function closeLb() {
+  lb.classList.remove('open');
+  document.body.style.overflow = '';
+  if (lastFocus) lastFocus.focus();
+}
+function stepLb(dir) {
+  const n = ALBUMS[curAlbum].photos.length;
+  lbIdx = (lbIdx + dir + n) % n;
+  lbImg.style.opacity = '0';
+  setTimeout(updateLb, 180);
+}
+function buildStrip() {
+  const a = ALBUMS[curAlbum];
+  lbStrip.innerHTML = '';
+  a.photos.forEach((src, i) => {
+    const t = document.createElement('img');
+    t.src = src;
+    t.alt = `${a.character} ${i + 1}번째 사진`;
+    t.addEventListener('click', e => {
+      e.stopPropagation();
+      if (i === lbIdx) return;
+      lbIdx = i;
+      lbImg.style.opacity = '0';
+      setTimeout(updateLb, 180);
+    });
+    lbStrip.appendChild(t);
+  });
+}
+function updateLb() {
+  const a = ALBUMS[curAlbum];
+  const n = a.photos.length;
+  const setLabel = a.note ? `${a.work} (${a.note})` : a.work;
+  lbImg.src = a.photos[lbIdx];
+  lbImg.alt = `${setLabel} ${a.character} 코스프레 ${lbIdx + 1}/${n}, 모델 ${a.model}`;
+  lbTtl.textContent = a.character;
+  lbModel.textContent = `${setLabel} · ${a.model}`;
+  lbRecipe.textContent = a.recipe || '';
+  lbRecipe.style.display = a.recipe ? '' : 'none';
+  lbCount.textContent = `${String(lbIdx + 1).padStart(2, '0')} / ${String(n).padStart(2, '0')}`;
+  lbStrip.querySelectorAll('img').forEach((t, i) => t.classList.toggle('cur', i === lbIdx));
+  lbImg.style.opacity = '';
+}
+
+document.getElementById('lbClose').addEventListener('click', closeLb);
+document.getElementById('lbPrev').addEventListener('click', e => { e.stopPropagation(); stepLb(-1); });
+document.getElementById('lbNext').addEventListener('click', e => { e.stopPropagation(); stepLb(1); });
+lb.addEventListener('click', e => { if (e.target === lb) closeLb(); });
+document.addEventListener('keydown', e => {
+  if (!lb.classList.contains('open')) return;
+  if (e.key === 'Escape') closeLb();
+  if (e.key === 'ArrowLeft') stepLb(-1);
+  if (e.key === 'ArrowRight') stepLb(1);
+});
+
+/* 모바일 스와이프 */
+let touchX = null;
+lb.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
+lb.addEventListener('touchend', e => {
+  if (touchX === null) return;
+  const dx = e.changedTouches[0].clientX - touchX;
+  if (Math.abs(dx) > 48) stepLb(dx < 0 ? 1 : -1);
+  touchX = null;
+}, { passive: true });
+
+/* ── 스크롤 리빌 ───────────────────────────────── */
+const io = new IntersectionObserver(entries => {
+  entries.forEach(en => {
+    if (en.isIntersecting) {
+      en.target.classList.add('on');
+      io.unobserve(en.target);
+    }
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+
+document.querySelectorAll('.reveal').forEach((el, i) => {
+  el.style.transitionDelay = `${(i % 4) * 70}ms`;
+  io.observe(el);
+});
+
+/* ── 내비게이션 스크롤 효과 ────────────────────── */
+const nav = document.getElementById('nav');
+const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 40);
+window.addEventListener('scroll', onScroll, { passive: true });
+onScroll();
+</script>
+</body>
+</html>
